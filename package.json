@@ -1,0 +1,34 @@
+{
+  "name": "cea-extractor",
+  "version": "0.0.1",
+  "description": "Extract CEA-608 closed caption information from an MP4",
+  "main": "index.js",
+  "typings": "index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "lint": "tslint -c tslint.json --project tsconfig.json",
+    "prepublish": "npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Comcast/cea-extractor.git"
+  },
+  "keywords": [
+    "cea-608",
+    "cc",
+    "cea-708"
+  ],
+  "contributors": [
+      "Brian Folts <brian.folts@gmail.com"
+  ],
+  "license": "BSD-3-Clause",
+  "dependencies": {
+    "codem-isoboxer": "^0.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^7.0.1",
+    "tslint": "4.1.1",
+    "tslint-eslint-rules": "^3.2.3",
+    "typescript": "^2.1.5"
+  }
+}

@@ -1,0 +1,20 @@
+{
+    "extends": "tslint:recommended",
+    "rulesDirectory": ["node_modules/tslint-eslint-rules/dist/rules"],
+    "rules": {
+        "arrow-parens": false,
+        "array-type": [true, "array"],
+        "cyclomatic-complexity": [ true, 10 ],
+        "max-classes-per-file": false,
+        "max-line-length": [ true, 150 ],
+        "member-ordering": [ true, "fields-first" ],
+        "object-literal-key-quotes": [ true, "consistent-as-needed" ],
+        "object-literal-shorthand": false,
+        "object-literal-sort-keys": false,
+        "ordered-imports": false,
+        "radix": false,
+        "trailing-comma": false,
+        "variable-name": [ true, "allow-leading-underscore" ]
+    }
+
+}
