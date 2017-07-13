@@ -36,7 +36,7 @@ jspm_packages
 # Optional REPL history
 .node_repl_history
 
-dist/*
+dist/worker.js
 bin/*.d.ts
 
 index.js
@@ -44,4 +44,4 @@ worker.js
 *.js.map
 
 index.d.ts
-worker.d.ts
+./worker.d.ts
