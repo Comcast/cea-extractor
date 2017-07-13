@@ -1,5 +1,12 @@
 .npmignore
+.nycrc
+.nyc_output
 index.ts
+pack.js
 tsconfig.json
 tslint.json
-bin/index.ts
+webpack.config.js
+worker.ts
+worker.js.map
+tests
+coverage

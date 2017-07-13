@@ -18,7 +18,7 @@
 // tslint:disable:no-bitwise
 /// <reference path="codem-isoboxer.d.ts" />
 
-import { parseBuffer, TRUNAtom, TFDTAtom, Sample } from "codem-isoboxer";
+import { CodemISO, parseBuffer, MOOFAtom, TRUNAtom, TFDTAtom } from "codem-isoboxer";
 
 const COLOR_WHITE: string = "white";
 const COLOR_GREEN: string = "green";
@@ -483,17 +483,18 @@ export class CaptionScreen {
                     row: i,
                     pos: row.firstNonEmpty(),
                     style: row.currPenState.serialize(),
-                    cols: row.chars.map((char) => {
-                        let charResult: ISerializedStyledUnicodeChar = {
-                            char: char.uchar,
-                            style: char.penState.serialize()
-                        };
-                        return charResult;
-                    })
+                    cols: row.chars.map(this.serializeChar)
                 });
             }
         }
         return results;
+    }
+
+    private serializeChar(char: StyledUnicodeChar): ISerializedStyledUnicodeChar {
+        return {
+            char: char.uchar,
+            style: char.penState.serialize()
+        };
     }
 
     public reset(): void {
@@ -677,7 +678,9 @@ export class Cea608Channel {
     }
 
     public insertChars(chars: number[]): void {
-        chars.forEach((char) => this.writeScreen.insertChar(char));
+        for (let char of chars) {
+            this.writeScreen.insertChar(char);
+        }
         if (this.mode === "MODE_PAINT-ON" || this.mode === "MODE_ROLL-UP") {
             this.outputDataUpdate();
         }
@@ -821,6 +824,8 @@ export class CEA608Parser {
     public channels: Cea608Channel[];
     public currChNr: number = -1;
     public lastTime: number | null = null;
+    private lastCmdA?: number;
+    private lastCmdB?: number;
 
     private dataField: number = 0;
 
@@ -846,38 +851,46 @@ export class CEA608Parser {
     }
 
     public add(buf: ArrayBuffer): void {
-        let file = parseBuffer(buf);
-        let tfdts = file.fetchAll<TFDTAtom>("tfdt");
-        let truns = file.fetchAll<TRUNAtom>("trun");
-        let raw = new DataView(buf);
+        let file: CodemISO = parseBuffer(buf);
+        let tfdts: TFDTAtom[] = file.fetchAll<TFDTAtom>("tfdt");
+        let truns: TRUNAtom[] = file.fetchAll<TRUNAtom>("trun");
+        let moofs: MOOFAtom[] = file.fetchAll<MOOFAtom>("moof");
+        let raw: DataView = new DataView(buf);
         let allCcData: ICCData = {
             fields: [[], []]
         };
-        truns.forEach((trun: TRUNAtom, idx: number) => {
-            let start = trun._cursor.offset + 8;
-            let dts = tfdts[idx].baseMediaDecodeTime;
-            trun.samples.forEach((sample: Sample) => {
-                getCCData(raw, start, sample.sample_size)
-                    .forEach((data, channelNumber: 0 | 1) => {
-                        allCcData.fields[channelNumber].push({
-                            time: dts + sample.sample_composition_time_offset,
-                            data
-                        });
+        for (let i = 0, length = truns.length; i < length; i++) {
+            let trun: TRUNAtom = truns[i];
+            let start = truns[i].data_offset + moofs[i]._raw.byteOffset;
+            let dts = tfdts[i].baseMediaDecodeTime;
+            for (let sample of trun.samples) {
+                let ccDatas = getCCData(raw, start, sample.sample_size);
+                if (ccDatas[0].length) {
+                    allCcData.fields[0].push({
+                        time: dts + sample.sample_composition_time_offset,
+                        data: ccDatas[0]
                     });
+                }
+                if (ccDatas[1].length) {
+                    allCcData.fields[1].push({
+                        time: dts + sample.sample_composition_time_offset,
+                        data: ccDatas[1]
+                    });
+                }
                 dts += sample.sample_duration;
                 start += sample.sample_size;
-            });
-        });
+            }
+        }
 
         allCcData.fields[this.dataField].sort(timeSorter);
 
         try {
-            allCcData.fields[this.dataField].forEach((cc: IFieldData) => {
+            for (let cc of allCcData.fields[this.dataField]) {
                 this.addData(Math.round((cc.time / this.timescale) * 1000), cc.data);
-            });
-       } catch (e) {
+            }
+        } catch (e) {
             console.warn("Unable to parse CC data");
-       }
+        }
     }
 
     public addData(t: number, byteList: number[]): void {
@@ -925,6 +938,15 @@ export class CEA608Parser {
 
         if (this.hasCmd(a, b)) {
 
+            /**
+             * Duplicate CMD commands get skipped once
+             */
+            if (this.lastCmdA === a && this.lastCmdB === b) {
+                this.lastCmdA = undefined;
+                this.lastCmdB = undefined;
+                return true;
+            }
+
             if (a === 0x14 || a === 0x17) {
                 chNr = 1;
             } else {
@@ -932,6 +954,8 @@ export class CEA608Parser {
             }
             this.channels[chNr - 1].runCmd(a, b);
             this.currChNr = chNr;
+            this.lastCmdA = a;
+            this.lastCmdB = b;
             return true;
         }
         return false;

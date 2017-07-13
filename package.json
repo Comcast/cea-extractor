@@ -1,13 +1,14 @@
 {
   "name": "cea-extractor",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Extract CEA-608 closed caption information from an MP4",
   "main": "index.js",
   "typings": "index.d.ts",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && webpack && node pack",
     "lint": "tslint -c tslint.json --project tsconfig.json",
-    "prepublish": "npm run build"
+    "prepublish": "npm run build",
+    "test": "nyc mocha --recursive tests"
   },
   "repository": {
     "type": "git",
@@ -27,8 +28,12 @@
   },
   "devDependencies": {
     "@types/node": "^7.0.1",
+    "chai": "^3.5.0",
+    "mocha": "^3.3.0",
+    "nyc": "^10.3.0",
     "tslint": "4.1.1",
     "tslint-eslint-rules": "^3.2.3",
-    "typescript": "^2.1.5"
+    "typescript": "^2.1.5",
+    "webpack": "^2.2.1"
   }
 }

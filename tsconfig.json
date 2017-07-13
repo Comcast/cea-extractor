@@ -12,11 +12,13 @@
         "strictNullChecks": true,
         "lib": [
             "dom",
-            "es5"
+            "es5",
+            "es2015.promise"
         ]
     },
     "files": [
         "index.ts",
+        "worker.ts",
         "bin/index.ts"
     ]
 }

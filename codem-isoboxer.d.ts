@@ -13,9 +13,14 @@ declare module "codem-isoboxer" {
         timescale: number;
     }
 
+    export interface MOOFAtom {
+        _raw: DataView;
+    }
+
     export interface TRUNAtom {
         _cursor: AtomData;
         samples: Array<Sample>;
+        data_offset: number;
     }
 
     export interface Sample {
