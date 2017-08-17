@@ -14,7 +14,8 @@
             "dom",
             "es5",
             "es2015.promise"
-        ]
+        ],
+        "typeRoots": ["node_modules/@types", "types"]
     },
     "files": [
         "index.ts",

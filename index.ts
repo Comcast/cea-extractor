@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-// tslint:disable:no-reference
 // tslint:disable:no-bitwise
-/// <reference path="codem-isoboxer.d.ts" />
 
 import { CodemISO, parseBuffer, MOOFAtom, TRUNAtom, TFDTAtom } from "codem-isoboxer";
 
