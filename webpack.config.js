@@ -14,7 +14,7 @@ module.exports = {
             comments: false,
             compress: {
                 warnings: false
-            },
+            }
         })
     ]
 };
