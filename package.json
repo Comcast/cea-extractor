@@ -1,6 +1,6 @@
 {
   "name": "cea-extractor",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Extract CEA-608 closed caption information from an MP4",
   "main": "index.js",
   "typings": "index.d.ts",
