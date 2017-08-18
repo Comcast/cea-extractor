@@ -1,5 +1,6 @@
 
 var webpack = require("webpack");
+var CopyFiles = require("copy-webpack-plugin");
 
 module.exports = {
     context: __dirname + "/",
@@ -15,6 +16,7 @@ module.exports = {
             compress: {
                 warnings: false
             }
-        })
+        }),
+        new CopyFiles([{ from: "worker-custom.d.ts", to: "worker.d.ts" }])
     ]
 };

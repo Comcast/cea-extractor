@@ -1,6 +1,6 @@
 {
   "name": "cea-extractor",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Extract CEA-608 closed caption information from an MP4",
   "main": "index.js",
   "typings": "index.d.ts",
@@ -20,7 +20,7 @@
     "cea-708"
   ],
   "contributors": [
-      "Brian Folts <brian.folts@gmail.com"
+    "Brian Folts <brian.folts@gmail.com"
   ],
   "license": "BSD-3-Clause",
   "dependencies": {
@@ -29,6 +29,7 @@
   "devDependencies": {
     "@types/node": "^7.0.1",
     "chai": "^3.5.0",
+    "copy-webpack-plugin": "^4.0.1",
     "mocha": "^3.3.0",
     "nyc": "^10.3.0",
     "tslint": "4.1.1",
