@@ -28,6 +28,8 @@ const COLOR_MAGENTA: string = "magenta";
 const COLOR_BLACK: string = "black";
 const COLOR_TRANSPARENT: string = "transparent";
 
+const EMPTY_CHAR: string = " ";
+
 const PAC_DATA_COLORS: string[] = [
     COLOR_WHITE,
     COLOR_GREEN,
@@ -183,11 +185,11 @@ export interface ISerializedPenState {
 }
 
 export interface ICCStyle {
-    foreground: string;
-    underline: boolean;
-    italics: boolean;
-    background: string;
-    flash: boolean;
+    foreground?: string;
+    underline?: boolean;
+    italics?: boolean;
+    background?: string;
+    flash?: boolean;
 }
 
 export interface IPACData extends ISerializedPenState {
@@ -199,17 +201,17 @@ export interface IPACData extends ISerializedPenState {
 export class PenState {
 
     constructor(
-        public foreground: string = "white",
+        public foreground: string = COLOR_WHITE,
         public underline: boolean = false,
         public italics: boolean = false,
-        public background: string = "black",
+        public background: string = COLOR_BLACK,
         public flash: boolean = false) {};
 
     public reset(): void {
-        this.foreground = "white";
+        this.foreground = COLOR_WHITE;
         this.underline = false;
         this.italics = false;
-        this.background = "black";
+        this.background = COLOR_BLACK;
         this.flash = false;
     }
 
@@ -242,8 +244,8 @@ export class PenState {
     }
 
     public isDefault(): boolean {
-        return (this.foreground === "white" && !this.underline && !this.italics &&
-                this.background === "black" && !this.flash);
+        return (this.foreground === COLOR_WHITE && !this.underline && !this.italics &&
+                this.background === COLOR_BLACK && !this.flash);
     }
 
     public equals(other: PenState): boolean {
@@ -268,12 +270,12 @@ export class StyledUnicodeChar {
 
     public penState: PenState;
 
-    constructor(public uchar: string = " ", foreground?: string, underline?: boolean, italics?: boolean, background?: string, flash?: boolean) {
+    constructor(public uchar: string = EMPTY_CHAR, foreground?: string, underline?: boolean, italics?: boolean, background?: string, flash?: boolean) {
         this.penState = new PenState(foreground, underline, italics, background, flash);
     }
 
     public reset(): void {
-        this.uchar = " ";
+        this.uchar = EMPTY_CHAR;
         this.penState.reset();
     }
 
@@ -296,7 +298,7 @@ export class StyledUnicodeChar {
     }
 
     public isEmpty(): boolean {
-        return this.uchar === " " && this.penState.isDefault();
+        return this.uchar === EMPTY_CHAR && this.penState.isDefault();
     }
 
 }
@@ -385,7 +387,7 @@ export class Row {
 
     public backSpace(): void {
         this.moveCursor(-1);
-        this.chars[this.pos].setChar(" ", this.currPenState);
+        this.chars[this.pos].setChar(EMPTY_CHAR, this.currPenState);
     }
 
     public insertChar(byte: number): void {
@@ -566,10 +568,10 @@ export class CaptionScreen {
             pacData.color = row.chars[prevPos].penState.foreground;
         }
         this.setPen({
-            foreground: pacData.color || "white",
+            foreground: pacData.color || COLOR_WHITE,
             underline : pacData.underline,
             italics : pacData.italics || false,
-            background : "black",
+            background : COLOR_BLACK,
             flash : false
         });
     }
@@ -769,7 +771,7 @@ export class Cea608Channel {
             let colorIndex = Math.floor(secondByte / 2) - 0x10;
             styles.foreground = PAC_DATA_COLORS[colorIndex];
         } else {
-            styles.foreground = "white";
+            styles.foreground = COLOR_WHITE;
         }
         this.writeScreen.setPen(styles);
     }
@@ -1023,7 +1025,7 @@ export class CEA608Parser {
             pacData.color = PAC_DATA_COLORS[Math.floor(pacIndex / 2)];
         } else if (pacIndex <= 0xf) {
             pacData.italics = true;
-            pacData.color = "white";
+            pacData.color = COLOR_WHITE;
         } else {
             pacData.indent = (Math.floor((pacIndex - 0x10) / 2)) * 4;
         }
@@ -1082,9 +1084,9 @@ export class CEA608Parser {
                 bkgData.background = bkgData.background + "_semi";
             }
         } else if (b === 0x2d) {
-            bkgData.background = "transparent";
+            bkgData.background = COLOR_TRANSPARENT;
         } else {
-            bkgData.foreground = "black";
+            bkgData.foreground = COLOR_BLACK;
             if (b === 0x2f) {
                 bkgData.underline = true;
             }
