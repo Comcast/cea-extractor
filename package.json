@@ -8,6 +8,7 @@
     "build": "tsc && webpack && node pack",
     "lint": "tslint -c tslint.json --project tsconfig.json",
     "prepublish": "npm run build",
+    "pretest": "npm run build",
     "test": "nyc mocha --recursive tests"
   },
   "repository": {

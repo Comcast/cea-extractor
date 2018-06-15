@@ -270,7 +270,14 @@ export class StyledUnicodeChar {
 
     public penState: PenState;
 
-    constructor(public uchar: string = EMPTY_CHAR, foreground?: string, underline?: boolean, italics?: boolean, background?: string, flash?: boolean) {
+    constructor(
+        public uchar: string = EMPTY_CHAR,
+        foreground?: string,
+        underline?: boolean,
+        italics?: boolean,
+        background?: string,
+        flash?: boolean
+    ) {
         this.penState = new PenState(foreground, underline, italics, background, flash);
     }
 
@@ -819,6 +826,14 @@ function timeSorter(a: IFieldData, b: IFieldData): number {
     return a.time - b.time;
 }
 
+export interface IConfiguration {
+    /**
+     * Should log debugging information
+     * defaults to false
+     */
+    debug?: boolean;
+}
+
 export class CEA608Parser {
 
     public channels: Cea608Channel[];
@@ -835,7 +850,10 @@ export class CEA608Parser {
 
     private timescale: number = 90000;
 
-    constructor() {
+    constructor(private configuration: IConfiguration = {
+        debug: false
+    }) {
+        configuration.debug = configuration.debug || false;
         this.channels = [
             new Cea608Channel(1, this),
             new Cea608Channel(2, this)
@@ -889,7 +907,9 @@ export class CEA608Parser {
                 this.addData(Math.round((cc.time / this.timescale) * 1000), cc.data);
             }
         } catch (e) {
-            console.warn("Unable to parse CC data");
+            if (this.configuration.debug === true) {
+                console.warn("Unable to parse CC data");
+            }
         }
     }
 
@@ -917,12 +937,12 @@ export class CEA608Parser {
     }
 
     private parseCharacters(ccData1: number, ccData2: number): void {
-        let charsFound: number[] = this.parseChars(ccData1, ccData2);
-        if (charsFound) {
+        let charsFound: number[] | undefined = this.parseChars(ccData1, ccData2);
+        if (charsFound !== undefined) {
             if (this.currChNr && this.currChNr >= 0) {
                 let channel = this.channels[this.currChNr - 1];
                 channel.insertChars(charsFound);
-            } else {
+            } else if (this.configuration.debug === true) {
                 console.warn("No channel found yet. TEXT-MODE?");
             }
         }
@@ -1033,17 +1053,14 @@ export class CEA608Parser {
         return pacData;
     }
 
-    public parseChars(a: number, b: number): number[] {
+    public parseChars(a: number, b: number): number[] | undefined {
 
-        let channelNr = null;
-        let charCodes = null;
+        let charCodes: number[] | undefined;
         let charCode1 = null;
 
         if (a >= 0x19) {
-            channelNr = 2;
             charCode1 = a - 8;
         } else {
-            channelNr = 1;
             charCode1 = a;
         }
         if (0x11 <= charCode1 && charCode1 <= 0x13) {
@@ -1060,7 +1077,7 @@ export class CEA608Parser {
         } else if (0x20 <= a && a <= 0x7f) {
             charCodes = (b === 0) ? [a] : [a, b];
         }
-        return charCodes as number[];
+        return charCodes;
     }
 
     private hasBackgroundAttributes(ccData1: number, ccData2: number): boolean {
